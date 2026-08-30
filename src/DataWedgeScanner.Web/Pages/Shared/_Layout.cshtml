@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DataWedge Scanner POC</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="app-header">
+        <h1>DataWedge Scanner POC</h1>
+        <p class="subtitle">Zebra MC93xx &rarr; DataWedge IP Output &rarr; TCP &rarr; PostgreSQL</p>
+    </header>
+
+    <main class="app-main">
+        @RenderBody()
+    </main>
+
+    <footer class="app-footer">
+        <p>Proof of concept. Not hardened for production use -- see README.md for known limitations.</p>
+    </footer>
+
+    <!--
+        SignalR JS client, loaded from a CDN for simplicity. If this machine has no general
+        internet access, this script will fail to load and the "live update" behavior below will
+        simply not activate -- the dashboard still shows correct data on every normal page
+        load/refresh, so nothing else depends on this script succeeding. To run fully offline,
+        `npm install @@microsoft/signalr` and copy dist/browser/signalr.min.js into
+        wwwroot/lib/signalr/ instead, then point the script tag at that local path.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@@8.0.7/dist/browser/signalr.min.js"></script>
+    <script src="~/js/site.js"></script>
+</body>
+</html>

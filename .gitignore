@@ -1,0 +1,14 @@
+## .NET
+bin/
+obj/
+*.user
+
+## IDE
+.vs/
+.vscode/
+.idea/
+
+## Secrets - never commit a real connection string
+appsettings.Production.json
+appsettings.*.local.json
+run.sh

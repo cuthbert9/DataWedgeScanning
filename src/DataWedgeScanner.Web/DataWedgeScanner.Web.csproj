@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DataWedgeScanner.Web</RootNamespace>
+    <UserSecretsId>c1a2f6c4-6b3f-4a1e-9c9a-datawedgescanner</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Floating "8.0.*" versions (rather than a single pinned patch) so `dotnet restore` always
+      resolves to whatever the newest compatible 8.0.x patch is on NuGet at restore time, instead
+      of potentially requesting an exact patch number that no longer exists. Pin to specific
+      versions once you have restored successfully, if you want fully reproducible builds.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.*" />
+  </ItemGroup>
+
+</Project>

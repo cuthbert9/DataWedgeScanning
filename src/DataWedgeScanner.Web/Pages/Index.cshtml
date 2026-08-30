@@ -1,0 +1,144 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="panel" id="scanner-status">
+    <h2>Scanner Status</h2>
+    <dl class="status-grid">
+        <dt>TCP Scanner Listener</dt>
+        <dd>@(Model.ScannerStatus.IsListening ? $"Port {Model.ScannerStatus.Port}" : $"Configured port {Model.ConfiguredTcpPort}")</dd>
+
+        <dt>Status</dt>
+        <dd>
+            @if (Model.ScannerStatus.IsListening)
+            {
+                <span class="badge badge-success">Listening</span>
+            }
+            else
+            {
+                <span class="badge badge-error">Not Listening</span>
+                @if (!string.IsNullOrEmpty(Model.ScannerStatus.LastError))
+                {
+                    <span class="error-detail">(@Model.ScannerStatus.LastError)</span>
+                }
+            }
+        </dd>
+
+        @if (Model.ScannerStatus.StartedAt.HasValue)
+        {
+            <dt>Listening since</dt>
+            <dd>@Model.ScannerStatus.StartedAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</dd>
+        }
+    </dl>
+</section>
+
+<section class="panel" id="scan-input">
+    <h2>Barcode Scan</h2>
+    <p class="hint">
+        Scan with the MC9400 (focus this field first) or type a barcode and press Enter.
+        Goes through the exact same <code>BarcodeScanService</code> the TCP listener uses.
+    </p>
+
+    @if (!string.IsNullOrEmpty(Model.ScanMessage))
+    {
+        <p class="flash-message">@Model.ScanMessage</p>
+    }
+
+    <form method="post" asp-page-handler="Scan" class="manual-scan-form">
+        <input type="text"
+               name="ScannedBarcode"
+               placeholder="e.g. MN-003441-02EN-P"
+               autocomplete="off"
+               autofocus
+               required />
+        <button type="submit">Submit Scan</button>
+    </form>
+</section>
+
+<section class="panel" id="items">
+    <h2>Items</h2>
+
+    <form method="get" class="filter-form">
+        <label for="StatusFilter">Filter by status:</label>
+        <select id="StatusFilter" name="StatusFilter" onchange="this.form.submit()">
+            <option value="" selected="@(Model.StatusFilter is null)">All</option>
+            @foreach (var status in Model.AllStatuses)
+            {
+                <option value="@status" selected="@(Model.StatusFilter == status)">@status</option>
+            }
+        </select>
+        <noscript><button type="submit">Apply</button></noscript>
+    </form>
+
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-wrap">Name</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th class="col-wrap col-hide-mobile">Description</th>
+                    <th class="col-hide-mobile">Updated At</th>
+                    <th class="col-hide-mobile">Barcode</th>
+                </tr>
+            </thead>
+            <tbody id="items-table-body">
+                @foreach (var item in Model.Items)
+                {
+                    <tr data-barcode="@item.Barcode">
+                        <td class="col-wrap">@item.Name</td>
+                        <td><span class="quantity-value">@item.Quantity</span></td>
+                        <td><span class="status-pill status-@item.Status.ToString().ToLowerInvariant()">@item.Status</span></td>
+                        <td class="col-wrap col-hide-mobile">@item.Description</td>
+                        <td class="col-hide-mobile">@item.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td class="col-hide-mobile">@item.Barcode</td>
+                    </tr>
+                }
+                @if (Model.Items.Count == 0)
+                {
+                    <tr><td colspan="6" class="empty-row">No items match this filter.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel" id="recent-scans">
+    <h2>Recent Scans</h2>
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Barcode</th>
+                    <th>Item</th>
+                    <th>Result</th>
+                    <th>Previous Status</th>
+                    <th>New Status</th>
+                </tr>
+            </thead>
+            <tbody id="recent-scans-table-body">
+                @foreach (var scan in Model.RecentScans)
+                {
+                    <tr>
+                        <td>@scan.ScannedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@scan.Barcode</td>
+                        <td>@(scan.Item?.Name ?? "-")</td>
+                        <td><span class="result-pill result-@scan.Result.ToString().ToLowerInvariant()">@scan.Result</span></td>
+                        <td>@(scan.PreviousStatus?.ToString() ?? "-")</td>
+                        <td>@(scan.NewStatus?.ToString() ?? "-")</td>
+                    </tr>
+                }
+                @if (Model.RecentScans.Count == 0)
+                {
+                    <tr><td colspan="6" class="empty-row">No scans recorded yet.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@* data-hub-url is read by wwwroot/js/site.js to connect to the SignalR hub for live updates. *@
+<div id="live-update-config" data-hub-url="@Url.Content("~/hubs/scan")" hidden></div>
