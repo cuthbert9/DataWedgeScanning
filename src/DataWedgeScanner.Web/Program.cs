@@ -1,6 +1,9 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using DataWedgeScanner.Web.Data;
 using DataWedgeScanner.Web.Hubs;
 using DataWedgeScanner.Web.Scanner;
+using DataWedgeScanner.Web.Serialization;
 using DataWedgeScanner.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +45,15 @@ builder.Services.AddHostedService<TcpScannerListenerService>();
 // --- Web UI ---------------------------------------------------------------
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+
+// REST API for non-browser clients (the Flutter mobile app). Enums serialize as camelCase
+// strings rather than System.Text.Json's default integers, and DateTimeOffset as UTC "Z"
+// ISO-8601, matching what the mobile client's JSON models expect.
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    options.JsonSerializerOptions.Converters.Add(new UtcDateTimeOffsetJsonConverter());
+});
 
 var app = builder.Build();
 
@@ -89,5 +101,6 @@ app.UseRouting();
 
 app.MapRazorPages();
 app.MapHub<ScanHub>("/hubs/scan");
+app.MapControllers();
 
 app.Run();

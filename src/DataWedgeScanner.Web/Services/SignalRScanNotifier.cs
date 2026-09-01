@@ -1,4 +1,5 @@
 using DataWedgeScanner.Web.Hubs;
+using DataWedgeScanner.Web.Serialization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace DataWedgeScanner.Web.Services;
@@ -26,12 +27,12 @@ public sealed class SignalRScanNotifier : IScanNotifier
         var payload = new
         {
             barcode = result.Barcode,
-            result = result.Result.ToString(),
+            result = EnumCasing.ToCamelCase(result.Result.ToString()),
             itemId = result.Item?.Id,
             itemName = result.Item?.Name,
             quantity = result.Item?.Quantity,
-            previousStatus = result.PreviousStatus?.ToString(),
-            newStatus = result.NewStatus?.ToString(),
+            previousStatus = result.PreviousStatus.HasValue ? EnumCasing.ToCamelCase(result.PreviousStatus.Value.ToString()) : null,
+            newStatus = result.NewStatus.HasValue ? EnumCasing.ToCamelCase(result.NewStatus.Value.ToString()) : null,
             scannedAt = result.ScannedAt,
             errorMessage = result.ErrorMessage,
         };

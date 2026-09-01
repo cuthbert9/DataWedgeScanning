@@ -90,7 +90,7 @@
                     <tr data-barcode="@item.Barcode">
                         <td class="col-wrap">@item.Name</td>
                         <td><span class="quantity-value">@item.Quantity</span></td>
-                        <td><span class="status-pill status-@item.Status.ToString().ToLowerInvariant()">@item.Status</span></td>
+                        <td><span class="status-pill status-@item.Status.ToString().ToLowerInvariant()">@EnumCasing.ToCamelCase(item.Status.ToString())</span></td>
                         <td class="col-wrap col-hide-mobile">@item.Description</td>
                         <td class="col-hide-mobile">@item.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
                         <td class="col-hide-mobile">@item.Barcode</td>
@@ -126,9 +126,9 @@
                         <td>@scan.ScannedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
                         <td>@scan.Barcode</td>
                         <td>@(scan.Item?.Name ?? "-")</td>
-                        <td><span class="result-pill result-@scan.Result.ToString().ToLowerInvariant()">@scan.Result</span></td>
-                        <td>@(scan.PreviousStatus?.ToString() ?? "-")</td>
-                        <td>@(scan.NewStatus?.ToString() ?? "-")</td>
+                        <td><span class="result-pill result-@scan.Result.ToString().ToLowerInvariant()">@EnumCasing.ToCamelCase(scan.Result.ToString())</span></td>
+                        <td>@(scan.PreviousStatus.HasValue ? EnumCasing.ToCamelCase(scan.PreviousStatus.Value.ToString()) : "-")</td>
+                        <td>@(scan.NewStatus.HasValue ? EnumCasing.ToCamelCase(scan.NewStatus.Value.ToString()) : "-")</td>
                     </tr>
                 }
                 @if (Model.RecentScans.Count == 0)
